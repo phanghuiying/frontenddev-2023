@@ -1,5 +1,5 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AddItem from "./components/AddItem";
 import SearchBar from "./components/SearchBar";
 import ItemsDisplay from "./components/ItemsDisplay";
@@ -39,23 +39,26 @@ function App() {
     setFilters(searchParams);
   };
 
-  const deleteItem = (item) => {
-    const items = data["items"];
-    const requestOptions = {
-      method: "DELETE",
-    };
-    fetch(`http://localhost:9000/items/${item.id}`, requestOptions).then(
-      (response) => {
-        if (response.ok) {
-          // Update current state
-          const idx = items.indexOf(item);
-          // Splice to data and delete
-          items.splice(idx, 1);
-          setData({ items });
+  const deleteItem = useCallback(
+    (item) => {
+      const items = data["items"];
+      const requestOptions = {
+        method: "DELETE",
+      };
+      fetch(`http://localhost:9000/items/${item.id}`, requestOptions).then(
+        (response) => {
+          if (response.ok) {
+            // Update current state
+            const idx = items.indexOf(item);
+            // Splice to data and delete
+            items.splice(idx, 1);
+            setData({ items });
+          }
         }
-      }
-    );
-  };
+      );
+    },
+    [data] 
+  );
 
   const addItemToData = (item) => {
     const requestOptions = {
@@ -110,7 +113,10 @@ function App() {
             <SearchBar updateSearchParams={updateFilters} />
           </div>
           <div className="row mt-3">
-            <ItemsDisplay items={filterData(data["items"])} deleteItem={deleteItem} />
+            <ItemsDisplay
+              items={filterData(data["items"])}
+              deleteItem={deleteItem}
+            />
           </div>
           <div className="row mt-3">
             <AddItem addItem={addItemToData} />
